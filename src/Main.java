@@ -1,5 +1,10 @@
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Scanner;
 
 /***
  * Game where we can have to Entities battle blow-by-blow and use their magic items.
@@ -35,8 +40,31 @@ class Store{
     ArrayList<MagicItem> inventory;
     Store(){
         this.inventory = new ArrayList<MagicItem>();
-        this.inventory.add( new MagicItem("Fire Sword", 100, "STRENGTH", 10 ) );
-        this.inventory.add( new MagicItem("Ice Shield", 100, "DEXTERITY", 10 ) );
+        FileInputStream f = null;
+        try {
+            f = new FileInputStream("store.txt");
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        Scanner s = new Scanner(f);
+        while(s.hasNext()){
+            String[] parts = s.nextLine().trim().split("\\|");
+            int price = Integer.parseInt(parts[1]);
+            int amount = Integer.parseInt(parts[3]);
+            this.inventory.add( new MagicItem(
+                    parts[0],
+                    price,
+                    parts[2],
+                    amount
+            ) );
+        }
+        try {
+            f.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+//        this.inventory.add( new MagicItem("Fire Sword", 100, "STRENGTH", 10 ) );
+//        this.inventory.add( new MagicItem("Ice Shield", 100, "DEXTERITY", 10 ) );
     }
     MagicItem buy(Entity buyer, int itemIndex){
         MagicItem item = this.inventory.get(itemIndex);
@@ -86,6 +114,8 @@ class Game{
             }
             attacker = (attacker == e1) ? e2 : e1;
             defender = (defender == e1) ? e2 : e1;
+            System.out.printf("\n%s has %d health, ", e1.name, e1.attrs.get("HEALTH"));
+            System.out.printf("%s has %d health.\n", e2.name, e2.attrs.get("HEALTH"));
         }
         if(e1.attrs.get("HEALTH") <= 0){
             System.out.println(e1.name + " has left this mortal coil.");
@@ -101,7 +131,14 @@ public class Main {
         Store store = new Store();
         ArrayList<Entity> players = new ArrayList<Entity>();
 
-        Entity hero = new Entity("Hero");
+        System.out.print("What is your hero name? ");
+        Scanner in = new Scanner(System.in);
+        String name = in.nextLine().trim();
+
+        System.out.print("What is your enemy name? ");
+        String enemyName = in.nextLine().trim();
+
+        Entity hero = new Entity(name);
         hero.attrs.put("STRENGTH", 18);
         hero.attrs.put("DEXTERITY", 18);
         hero.attrs.put("HEALTH", 100);
@@ -109,7 +146,7 @@ public class Main {
         store.buy(hero, 1); //1 is sheild
         players.add(hero);
 
-        Entity zombie = new Entity("Zombie");
+        Entity zombie = new Entity(enemyName);
         zombie.attrs.put("STRENGTH", 12);
         zombie.attrs.put("DEXTERITY", 12);
         zombie.attrs.put("HEALTH", 100);
