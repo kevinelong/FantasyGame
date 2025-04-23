@@ -35,8 +35,8 @@ class Store{
     ArrayList<MagicItem> inventory;
     Store(){
         this.inventory = new ArrayList<MagicItem>();
-        this.inventory.add( new MagicItem("Fire Sword", 100, "STR", 10 ) );
-        this.inventory.add( new MagicItem("Ice Sheild", 100, "DEX", 10 ) );
+        this.inventory.add( new MagicItem("Fire Sword", 100, "STRENGTH", 10 ) );
+        this.inventory.add( new MagicItem("Ice Shield", 100, "DEXTERITY", 10 ) );
     }
     MagicItem buy(Entity buyer, int itemIndex){
         MagicItem item = this.inventory.get(itemIndex);
@@ -59,13 +59,26 @@ class Game{
         Entity attacker = e1;
         Entity defender = e2;
         while(e1.attrs.get("HEALTH") > 0 && e2.attrs.get("HEALTH") > 0) {
-            //TODO apply magic items
-            int baseChance = 50 + e1.attrs.get("DEXTERITY") - e2.attrs.get("DEXTERITY");
-            //TODO apply magic items
+            int dexModifier = 0;
+            int strModifier = 0;
+            for(MagicItem mi : attacker.inventory){
+                if (mi.attr == "DEXTERITY"){
+                    dexModifier += mi.amount;
+                }else if(mi.attr == "STRENGTH"){
+                    strModifier += mi.amount;
+                }
+            }
+            int dexModifierDefender = 0;
+            for(MagicItem mi : defender.inventory){
+                if (mi.attr == "DEXTERITY"){
+                    dexModifierDefender += mi.amount;
+                }
+            }
+            int baseChance = 50 + e1.attrs.get("DEXTERITY") - e2.attrs.get("DEXTERITY") + dexModifier - dexModifierDefender;
             double roll = (Math.random() + Math.random() + Math.random()) / 3; //bell curve
             if(roll > (baseChance / 100.0)){
                 //HIT
-                int damage = 10 + attacker.attrs.get("STRENGTH");
+                int damage = 10 + attacker.attrs.get("STRENGTH") + strModifier;
                 defender.attrs.put("HEALTH", defender.attrs.get("HEALTH") - damage);
                 System.out.println(attacker.name + " hits " + defender.name + " for " + damage + " damage.");
             }else{
