@@ -56,6 +56,31 @@ class Game{
         //BCS Base Chance of success +- dex armor value of your items
         //Damage str +- attack value of item;
         System.out.println("Battling!!!!");
+        Entity attacker = e1;
+        Entity defender = e2;
+        while(e1.attrs.get("HEALTH") > 0 && e2.attrs.get("HEALTH") > 0) {
+            //TODO apply magic items
+            int baseChance = 50 + e1.attrs.get("DEXTERITY") - e2.attrs.get("DEXTERITY");
+            //TODO apply magic items
+            double roll = (Math.random() + Math.random() + Math.random()) / 3; //bell curve
+            if(roll > (baseChance / 100.0)){
+                //HIT
+                int damage = 10 + attacker.attrs.get("STRENGTH");
+                defender.attrs.put("HEALTH", defender.attrs.get("HEALTH") - damage);
+                System.out.println(attacker.name + " hits " + defender.name + " for " + damage + " damage.");
+            }else{
+                System.out.println(attacker.name + " swings and misses " + defender.name + ".");
+            }
+            attacker = (attacker == e1) ? e2 : e1;
+            defender = (defender == e1) ? e2 : e1;
+        }
+        if(e1.attrs.get("HEALTH") <= 0){
+            System.out.println(e1.name + " has left this mortal coil.");
+        }
+        if(e2.attrs.get("HEALTH") <= 0){
+            System.out.println(e2.name + " has met their doom.");
+        }
+        System.out.println("BATTLE CONCLUDED");
     }
 }
 public class Main {
@@ -73,8 +98,8 @@ public class Main {
 
         Entity zombie = new Entity("Zombie");
         zombie.attrs.put("STRENGTH", 12);
-        zombie.attrs.put("DEXTERITY", 8);
-        zombie.attrs.put("HEALTH", 50);
+        zombie.attrs.put("DEXTERITY", 12);
+        zombie.attrs.put("HEALTH", 100);
         zombie.attrs.put("GOLD", 100);
         store.buy(zombie, 0); //sword
         players.add(zombie);
